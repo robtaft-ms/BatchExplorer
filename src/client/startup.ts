@@ -40,7 +40,7 @@ function registerAuthProtocol() {
     // This call needs to be done after electron app is ready.
     protocol.registerStringProtocol("urn", (request, callback) => {
         // Doesn't matter how the protocol is handled; error is fine
-        callback();
+        callback("ok");
     });
 }
 

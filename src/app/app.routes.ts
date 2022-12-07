@@ -8,10 +8,11 @@ import { AuthSettingsComponent, SettingsComponent } from "app/components/setting
 import { AccountDefaultComponent, AccountDetailsComponent } from "./components/account/details";
 import { AccountHomeComponent } from "./components/account/home/account-home.component";
 import { AccountMonitoringHomeComponent } from "./components/account/monitoring";
+import { LoginComponent } from "./components/login";
 
 
 export const routes: Routes = [
-    { path: "", redirectTo: "accounts", pathMatch: "full" },
+    { path: "", redirectTo: "login", pathMatch: "full" },
     {
         component: AccountHomeComponent,
         path: "accounts",
@@ -107,4 +108,8 @@ export const routes: Routes = [
         path: "keybindings",
         component: KeyBindingsComponent,
     },
+    {
+        path: "login",
+        component: LoginComponent,
+    }
 ];

@@ -8,6 +8,7 @@ import inquirer from "inquirer";
 import * as os from "os";
 import * as path from "path";
 import * as shell from "shelljs";
+import { createEnglishTranslations } from "./translation-functions";
 
 export const defaultBatchExplorerHome = path.resolve(__dirname, "../../");
 export const configFile = path.resolve(os.homedir(), ".config/batch/bux.json");
@@ -96,6 +97,31 @@ export function copyFiles(sourcePath: string, destPath: string) {
     }
 
     shell.cp(sourcePath, destPath);
+}
+
+export async function buildTranslations(
+    sourcePath: string,
+    destPathJSON: string,
+    destPathRESJSON: string
+) {
+    if (!sourcePath) {
+        error("Failed to build translations: No source path specified");
+        return;
+    }
+    if (!destPathJSON) {
+        error(
+            "Failed to build translations: No dest path for JSON output files specified"
+        );
+        return;
+    }
+    if (!destPathRESJSON) {
+        error(
+            "Failed to build translations: No dest path for RESJSON output files specified"
+        );
+        return;
+    }
+
+    await createEnglishTranslations(sourcePath, destPathJSON, destPathRESJSON);
 }
 
 export function mkdirp(targetPath: string) {

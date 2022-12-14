@@ -23,4 +23,12 @@ describe("CLI", () => {
         util.chmodx(["a", "b", "c"]);
         expect(shelljs.chmod).toHaveBeenCalledTimes(3);
     });
+
+    test("Localization", async () => {
+        await util.buildTranslations(
+            "./__tests__/loc-source",
+            "./build/test-results/loc-results",
+            "./build/test-results/loc-results"
+        );
+    });
 });

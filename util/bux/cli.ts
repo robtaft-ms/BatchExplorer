@@ -27,18 +27,21 @@ yargs
             "Localize YAML files in src and convert them to RESJSON in dest",
         builder: (yargs: yargs.Argv) =>
             yargs
-                .positional("sourceDirectory", {
+                .option("sourceDirectory", {
                     describe: "The source directory containing YAML files",
                     default: "",
+                    demandOption: true,
                 })
-                .positional("destDirectoryJSON", {
+                .option("destDirectoryJSON", {
                     describe: "The destination directory for JSON output files",
                     default: "",
+                    demandOption: true,
                 })
-                .positional("destDirectoryRESJSON", {
+                .option("destDirectoryRESJSON", {
                     describe:
                         "The destination directory for RESJSON output files",
                     default: "",
+                    demandOption: true,
                 }),
         handler: (argv) =>
             buildTranslations(

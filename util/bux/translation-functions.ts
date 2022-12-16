@@ -7,8 +7,7 @@ import { promisify } from "util";
 import { glob as globF } from "glob";
 import * as jsyaml from "js-yaml";
 import * as util from "util";
-import { readdir } from "node:fs/promises";
-import { resolve } from "path";
+import * as path from "path";
 
 type StringMap<V> = { [key: string]: V };
 
@@ -19,75 +18,43 @@ export async function createEnglishTranslations(
     destJSONPath: string,
     destRESJSONPath: string
 ) {
-    await loadDevTranslations(sourcePath, destJSONPath, destRESJSONPath);
-}
+    const translations = await loadDevTranslations(sourcePath);
+    const content = JSON.stringify(translations, null, 2);
 
-async function* getFiles(dir: any): any {
-    const dirents = await readdir(dir, { withFileTypes: true });
-    for (const dirent of dirents) {
-        const res = resolve(dir, dirent.name);
-        if (dirent.isDirectory()) {
-            yield* getFiles(res);
-        } else {
-            //console.log(res);
-            yield res;
-        }
-    }
+    const jsonPath = path.join(destJSONPath, "resources.en.json");
+    await writeFile(jsonPath, content);
+    console.log(`Saved combined english translations to JSON file ${jsonPath}`);
+
+    const resJsonPath = path.join(destRESJSONPath, "resources.en.resjson");
+    await writeFile(resJsonPath, content);
+    console.log(
+        `Saved combined english translations to RESJSON file ${resJsonPath}`
+    );
 }
 
 //load-dev-translations.ts
 export async function loadDevTranslations(
-    sourcePath: string,
-    destJSONPath: string,
-    destRESJSONPath: string
-): Promise<any> {
-    for await (const f of getFiles(sourcePath)) {
-        if (f.toString().endsWith(".i18n.yml")) {
-            //console.log(f);
-            //console.log(fs.readFileSync(f, { encoding: "utf8" }));
-
-            const loader = new DevTranslationsLoader();
-            let hasDuplicate = false;
-
-            const translations = await loader.load(f, (key, file) => {
-                console.warn(`${key} is being duplicated. "${file}"`);
-                hasDuplicate = true;
-            });
-
-            if (hasDuplicate) {
-                process.exit(1);
-            }
-
-            const jsonObject = Array.from(translations).reduce(
-                (obj: Record<string, string>, [key, value]) => {
-                    obj[key] = value;
-                    return obj;
-                },
-                {}
-            );
-
-            const content = JSON.stringify(jsonObject, null, 2);
-
-            const reduced = f.toString().split("\\").pop().split(".");
-
-            const newJSONName = reduced[0] + ".json";
-            const newRESJSONName = reduced[0] + ".resjson";
-
-            await writeFile(destJSONPath + "/" + newJSONName, content);
-
-            console.log(
-                `Saved combined english translations (${translations.size}) to JSON file ${newJSONName}`
-            );
-
-            await writeFile(destRESJSONPath + "/" + newRESJSONName, content);
-
-            console.log(
-                `Saved combined english translations (${translations.size}) to RESJSON file ${newRESJSONName}`
-            );
-        }
+    sourcePath: string
+): Promise<{ [key: string]: string }> {
+    const loader = new DevTranslationsLoader();
+    console.log("Loading dev translations");
+    let hasDuplicate = false;
+    const translations = await loader.load(sourcePath, (key, file) => {
+        console.warn(`${key} is being duplicated. "${file}"`);
+        hasDuplicate = true;
+    });
+    console.log(`Loaded dev translations (${translations.size})`);
+    if (hasDuplicate) {
+        throw new Error();
     }
 
-    //return "fg";
+    return Array.from(translations).reduce(
+        (obj: Record<string, string>, [key, value]) => {
+            obj[key] = value;
+            return obj;
+        },
+        {}
+    );
 }
 
 //dev-translations-loader.ts
@@ -107,10 +74,15 @@ export class DevTranslationsLoader {
     ): Promise<Map<string, string>> {
         this.translations.clear();
         if (!this.translationFiles) {
-            this.translationFiles = await glob("**/*.i18n.yml", {
-                ignore: "node_modules/**/*",
-            });
+            const resolvedSourcePath = path.resolve(sourcePath);
+            this.translationFiles = await glob(
+                `${resolvedSourcePath}/**/*.i18n.yml`,
+                {
+                    ignore: "node_modules/**/*",
+                }
+            );
         }
+
         await this._processFiles(this.translationFiles, duplicateCallback);
         return this.translations;
     }

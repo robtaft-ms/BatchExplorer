@@ -140,7 +140,7 @@
       "trace": true,
       "url": "file://*",
       "webRoot": "${workspaceRoot}/build",
-      "timeout": 300000,
+      "timeout": 30000,
       "presentation": {
         "group": "Desktop",
         "order": 40

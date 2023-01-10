@@ -21,7 +21,8 @@ import {
 
 yargs
     .command({
-        command: "build-translations <src> <destJSON> <destRESJSON>",
+        command:
+            "build-translations <src> <destJSON> <destRESJSON> <packageName>",
         aliases: ["translate"],
         describe:
             "Localize YAML files in src and convert them to RESJSON in dest",
@@ -42,12 +43,19 @@ yargs
                         "The destination directory for RESJSON output files",
                     default: "",
                     demandOption: true,
+                })
+                .option("packageName", {
+                    describe:
+                        "The name of the module (e.g. lib.common) that translations will be built for",
+                    default: "",
+                    demandOption: false,
                 }),
         handler: (argv) =>
             buildTranslations(
                 argv.sourceDirectory,
                 argv.destDirectoryJSON,
-                argv.destDirectoryRESJSON
+                argv.destDirectoryRESJSON,
+                argv.packageName
             ),
     })
     .command({

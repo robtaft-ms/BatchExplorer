@@ -16,9 +16,10 @@ const writeFile = promisify(fs.writeFile);
 export async function createEnglishTranslations(
     sourcePath: string,
     destJSONPath: string,
-    destRESJSONPath: string
+    destRESJSONPath: string,
+    packageName?: string
 ) {
-    const translations = await loadDevTranslations(sourcePath);
+    const translations = await loadDevTranslations(sourcePath, packageName);
     const content = JSON.stringify(translations, null, 2);
 
     const jsonPath = path.join(destJSONPath, "resources.en.json");
@@ -34,7 +35,8 @@ export async function createEnglishTranslations(
 
 //load-dev-translations.ts
 export async function loadDevTranslations(
-    sourcePath: string
+    sourcePath: string,
+    packageName?: string
 ): Promise<{ [key: string]: string }> {
     const loader = new DevTranslationsLoader();
     console.log("Loading dev translations");
@@ -50,8 +52,18 @@ export async function loadDevTranslations(
 
     return Array.from(translations).reduce(
         (obj: Record<string, string>, [key, value]) => {
-            obj[key] = value;
-            return obj;
+            if (packageName) {
+                obj[packageName + "." + key] = value;
+            } else {
+                obj[key] = value;
+            }
+
+            // Sort the entries by key in alphabetical order
+            const sortedObj: { [key: string]: string } = {};
+            Object.keys(obj)
+                .sort()
+                .forEach((key) => (sortedObj[key] = obj[key]));
+            return sortedObj;
         },
         {}
     );

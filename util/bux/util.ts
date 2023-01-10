@@ -102,7 +102,8 @@ export function copyFiles(sourcePath: string, destPath: string) {
 export async function buildTranslations(
     sourcePath: string,
     destPathJSON: string,
-    destPathRESJSON: string
+    destPathRESJSON: string,
+    packageName?: string
 ) {
     if (!sourcePath) {
         error("Failed to build translations: No source path specified");
@@ -121,7 +122,12 @@ export async function buildTranslations(
         return;
     }
 
-    await createEnglishTranslations(sourcePath, destPathJSON, destPathRESJSON);
+    await createEnglishTranslations(
+        sourcePath,
+        destPathJSON,
+        destPathRESJSON,
+        packageName
+    );
 }
 
 export function mkdirp(targetPath: string) {
